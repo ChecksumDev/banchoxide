@@ -1,5 +1,10 @@
 use serde::{Serialize, Serializer};
 
+//? ===== Prefixes =====
+//? Osu: Client -> Server
+//? Cho: Server -> Client
+//? ===== Prefixes =====
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 #[repr(i16)]
 pub enum Packets {

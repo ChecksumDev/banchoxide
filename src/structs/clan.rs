@@ -1,4 +1,8 @@
+use crate::constants::privileges::ClanPrivileges;
+use bson::oid::ObjectId;
 use chrono::{DateTime, Utc};
+
+use super::player::Player;
 
 // from __future__ import annotations
 
@@ -15,6 +19,18 @@ use chrono::{DateTime, Utc};
 
 // __all__ = ("Clan",)
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Clan {
+    pub _id: ObjectId,
+    pub name: String,
+    pub tag: String,
+    pub description: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub owner: ObjectId,
+    pub members: Vec<Player>,
+    pub privileges: ClanPrivileges,
+}
 
 // class Clan:
 //     """A class to represent a single bancho.py clan."""

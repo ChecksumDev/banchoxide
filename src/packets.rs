@@ -135,6 +135,7 @@ packet_impl!(f32);
 packet_impl!(i64);
 packet_impl!(String);
 
+
 // these ones couldn't be handled by macro :(
 
 impl Add<Vec<u8>> for PacketWriter {
@@ -165,6 +166,22 @@ impl Add<&Vec<i32>> for PacketWriter {
 
 impl AddAssign<&Vec<i32>> for PacketWriter {
     fn add_assign(&mut self, data: &Vec<i32>) {
+        self.write(data);
+    }
+}
+
+impl Add<Vec<i32>> for PacketWriter {
+    type Output = PacketWriter;
+
+    fn add(mut self, data: Vec<i32>) -> PacketWriter {
+        self.write(data);
+
+        return self;
+    }
+}
+
+impl AddAssign<Vec<i32>> for PacketWriter {
+    fn add_assign(&mut self, data: Vec<i32>) {
         self.write(data);
     }
 }
@@ -427,7 +444,7 @@ macro_rules! write_packet {
         {
             let mut w = PacketWriter::new($packet);
             $(
-                w += $val;
+                w += $val.to_owned();
             )+
             w.serialise()
         }
@@ -464,38 +481,8 @@ register_packets! {
     #[packet(packets::Packets::OsuRequestStatusUpdate, false)]
     pub async fn request_status_update(player: &mut Player, reader: &mut Reader) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         println!("[PING]: {} sent RequestStatusUpdate", player.name);
-        //let mut writer = PacketWriter::new(packets::Packets::ChoUserStats);
+        let packet = packets::ChoUserStats::new(player.id.unwrap(), 1, "wysi", "wysi", 1, 1, 69420, 727, 69.420, 727, 727, 727, 727 as i16).await;
 
-        // return write(
-        //     ServerPackets.USER_STATS,
-        //     (p.id, osuTypes.i32),
-        //     (p.status.action, osuTypes.u8),
-        //     (p.status.info_text, osuTypes.string),
-        //     (p.status.map_md5, osuTypes.string),
-        //     (p.status.mods, osuTypes.i32),
-        //     (p.status.mode.as_vanilla, osuTypes.u8),
-        //     (p.status.map_id, osuTypes.i32),
-        //     (rscore, osuTypes.i64),
-        //     (gm_stats.acc / 100.0, osuTypes.f32),
-        //     (gm_stats.plays, osuTypes.i32),
-        //     (gm_stats.tscore, osuTypes.i64),
-        //     (gm_stats.rank, osuTypes.i32),
-        //     (pp, osuTypes.i16),  # why not u16 peppy :(
-        // )
-
-        let ser = write_packet!(packets::Packets::ChoUserStats,
-            player.id.unwrap(),
-            1 as u8, "wysi".to_string(),
-            "wysi".to_string(),
-            1 as i32, 1 as u8,
-            69420,
-            727 as i64,
-            69.420 as f32,
-            727,
-            727 as i64,
-            727,
-            727 as i16);
-        
-        Ok(ser)
+        Ok(packet.write().await?)
     }
 }
